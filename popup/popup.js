@@ -569,3 +569,274 @@
             }
         } else null !== (n = e.target.parentElement) && n.classList.contains("window-entry") && A(q, n, V) && e.target.classList.add("insert-cursor-window")
     }
+
+     function ne(e) {
+        e.preventDefault(), e.stopPropagation();
+        let t = Array.from(r.tabsList.getElementsByClassName("insert-cursor"));
+        for (let e = 0; e < t.length; e++) {
+            let n = t[e];
+            n.parentElement.removeChild(n)
+        }
+        let n, a = r.tabsList.getElementByClassName("insert-cursor-window");
+        if (null !== a && a.classList.remove("insert-cursor-window"), e.target.classList.contains("tab-entry")) {
+            if (!e.target.isSameNode(G)) {
+                let t = e.target.getBoundingClientRect();
+                G = e.target, z = !1, e.clientY - t.top >= t.height / 2 && (G = G.nextSibling, null === G && (z = !0, G = e.target))
+            }
+            if (B(q, G, z, V)) {
+                let e = f(C(G)),
+                    t = Array.prototype.indexOf.call(G.parentElement.childNodes, q),
+                    n = Array.prototype.indexOf.call(G.parentElement.childNodes, G),
+                    a = z ? -1 : -1 !== t && n > t && e === K ? n - 1 : n,
+                    s = y(q);
+                browser.tabs.move(s, {
+                    windowId: e,
+                    index: a
+                }), z ? I(q, C(G)) : L(q, G)
+            }
+        } else if (null !== (n = e.target.parentElement) && n.classList.contains("window-entry") && A(q, n, V)) {
+            let e = y(q),
+                t = f(n);
+            browser.tabs.move(e, {
+                windowId: t,
+                index: -1
+            }), I(q, n)
+        }
+    }
+
+    function ae(e) {
+        let t = f(e.target.parentElement);
+        browser.windows.update(t, {
+            focused: !0
+        })
+    }
+
+    function se(e) {
+        e.preventDefault();
+        let t = document.getElementById("window-entry-context-menu");
+        t.setAttribute("data-window-id", f(e.target.parentElement)), o(e.pageX, e.pageY, t)
+    }
+
+    function ie(e) {
+        let t = f(e.target.parentElement.parentElement.parentElement);
+        browser.windows.remove(t)
+    }
+    async function oe() {
+        let e = await browser.windows.getAll({
+            populate: !0,
+            windowTypes: ["normal", "popup", "devtools"]
+        });
+        await
+        function(e) {
+            return u().then((function(t) {
+                for (let n = 0; n < e.length; n++) e[n].id === t && (e[n].focused = !0)
+            }))
+        }(e), await async function(e) {
+            let {
+                windowProperties: t
+            } = await Object(d.a)("GET_WINDOW_PROPS", {});
+            r.tabsList.innerHTML = "";
+            let n, a = document.createDocumentFragment(),
+                s = document.createElement("span");
+            s.classList.add("inline-button"), s.classList.add("img-button"), s.classList.add("opacity-changing-button"), s.classList.add("window-entry-remove-btn"), s.style.backgroundImage = "url(../icons/close.svg)";
+            let o = document.createElement("div");
+            o.style.display = "inline-block", s.appendChild(o);
+            let l = document.createElement("span");
+            l.classList.add("inline-button"), l.classList.add("red-button"), l.classList.add("img-button"), l.classList.add("tab-entry-remove-btn"), l.style.backgroundImage = "url(../icons/close.svg)";
+            let u = document.createElement("span");
+            u.classList.add("inline-button"), u.classList.add("img-button"), u.classList.add("opacity-changing-button"), u.classList.add("tab-entry-pin-btn"), u.style.backgroundImage = "url(../icons/pin.svg)";
+            let m = document.createElement("span");
+            m.classList.add("inline-button"), m.classList.add("img-button"), m.classList.add("opacity-changing-button"), m.classList.add("tab-entry-speaker-btn");
+            for (let o = 0; o < e.length; o++) {
+                let r = e[o],
+                    d = document.createElement("li");
+                d.classList.add("window-entry"), d.classList.add("category");
+                let b = document.createDocumentFragment();
+                d.setAttribute("data-window_id", r.id);
+                let g = document.createElement("span");
+                g.addEventListener("click", ae), g.addEventListener("contextmenu", se);
+                let p = s.cloneNode(!0);
+                p.addEventListener("click", ie);
+                let y = document.createElement("span");
+                y.classList.add("window-entry-buttons"), y.appendChild(p);
+                let f = document.createElement("span");
+                f.classList.add("window-title"), t.hasOwnProperty(r.id) ? f.textContent += t[r.id].name + " (" + (o + 1) + ")" : f.textContent += "Window " + (o + 1), r.focused && (n = d, d.classList.add("current-window"), f.textContent += " - Current"), r.incognito && (d.classList.add("incognito-window"), f.textContent += " (Incognito)"), g.appendChild(f), g.appendChild(y), g.classList.add("darker-button"), b.appendChild(g), d.addEventListener("dragstart", ee), d.addEventListener("dragover", te), d.addEventListener("drop", ne), d.setAttribute("draggable", "true");
+                let w = document.createElement("ul");
+                w.classList.add("category-list"), w.classList.add("window-entry-tabs");
+                let h = document.createDocumentFragment();
+                for (let e = 0; e < r.tabs.length; e++) {
+                    let t = r.tabs[e];
+                    if (t.id !== browser.tabs.TAB_ID_NONE) {
+                        let e = document.createElement("li");
+                        e.classList.add("tab-entry"), e.classList.add("button"), e.setAttribute("draggable", "true");
+                        let n, a = document.createDocumentFragment(),
+                            s = document.createElement("span");
+                        s.classList.add("tab-title"), s.textContent += t.title;
+                        let o = document.createElement("div");
+                        if (o.classList.add("tab-title-wrapper"), o.appendChild(s), t.active && e.classList.add("current-tab"), n = document.createElement("img"), n.classList.add("tab-entry-favicon"), t.favIconUrl) {
+                            let e;
+                            e = t.favIconUrl.startsWith("chrome://") ? Promise.resolve(t.favIconUrl) : r.incognito ? M(t.favIconUrl, !0) : M(t.favIconUrl), e.then(e => {
+                                n.src = e
+                            })
+                        }
+                        p = l.cloneNode(!1), p.addEventListener("click", S), p.addEventListener("mouseover", i);
+                        let d = u.cloneNode(!1);
+                        d.addEventListener("click", P), d.addEventListener("mouseover", i);
+                        let b = m.cloneNode(!1);
+                        if (b.addEventListener("click", U), b.addEventListener("mouseover", i), t.audible ? t.mutedInfo.muted ? b.setAttribute("data-state", "off") : b.setAttribute("data-state", "on") : b.setAttribute("data-state", "none"), y = document.createElement("span"), y.classList.add("tab-entry-buttons"), y.appendChild(d), y.appendChild(b), y.appendChild(p), e.setAttribute("tabindex", "0"), browser.contextualIdentities && !["firefox-default", "firefox-private"].includes(t.cookieStoreId) && await browser.contextualIdentities.get(t.cookieStoreId).then(e => {
+                                let t = document.createElement("div");
+                                t.classList.add("contextual-identity-indicator"), t.style.backgroundColor = e.colorCode, a.appendChild(t)
+                            }), e.setAttribute("data-tab_id", c(t.id)), a.appendChild(n), void 0 === n && (e.classList.add("noicon"), n.style.display = "none"), a.appendChild(o), a.appendChild(y), e.appendChild(a), e.addEventListener("mouseover", O), e.addEventListener("click", D), t.pinned) {
+                            d.style.backgroundImage = "url(../icons/pinremove.svg)", e.classList.add("pinned-tab");
+                            let t = Array.from(w.getElementsByClassName("pinned-tab")),
+                                n = t[t.length - 1];
+                            void 0 !== n ? h.insertBefore(e, n.nextSibling) : h.insertBefore(e, w.childNodes[0])
+                        } else h.appendChild(e)
+                    }
+                }
+                w.appendChild(h), b.appendChild(w), d.appendChild(b), a.appendChild(d)
+            }
+            r.tabsList.appendChild(a), r.tabsList.addEventListener("click", i), document.getElementById("tabs").style.display = "block", n.scrollIntoView({
+                behavior: "smooth"
+            })
+        }(e)
+    }
+
+    function re() {
+        let e = function(e) {
+            let t = window.getComputedStyle(e),
+                n = parseFloat(t.marginTop) + parseFloat(t.marginBottom);
+            return e.offsetHeight + n
+        }(document.getElementById("search-area"));
+        document.getElementById("tabs").style.height = "calc(100% - " + e + "px)"
+    }
+    async function de(e) {
+        let t = document.getElementById("window-entry-context-menu"),
+            n = document.getElementById("window-entry-context-menu-purpose");
+        n.setAttribute("data-window-id", t.getAttribute("data-window-id"));
+        let a = document.getElementById("window-entry-rename-box");
+        a.value = "", a.setAttribute("placeholder", "Default Numbering"), o(t.offsetLeft, t.offsetTop, n), t.removeAttribute("data-state"), a.focus()
+    }
+
+    function le() {
+        document.getElementById("window-entry-context-menu-purpose").removeAttribute("data-state")
+    }
+
+    function ce() {
+        let e = document.getElementById("window-entry-context-menu-purpose"),
+            t = document.getElementById("window-entry-rename-box").value.trim();
+        Object(d.a)("SET_WINDOW_PROPS", {
+            windowId: parseInt(e.getAttribute("data-window-id")),
+            name: "" === t ? void 0 : t
+        }).then(() => oe()), e.removeAttribute("data-state")
+    }
+
+    function ue(e) {
+        "Enter" === e.code ? ce() : "Escape" === e.code && le()
+    }
+
+    function me(e, t) {
+        document.documentElement.style.width = e + "px", document.documentElement.style.height = t + "px", document.body.style.width = e + "px", document.body.style.height = t + "px"
+    }
+
+    async function be() {
+        let e = (await a.a()).popup;
+        if (me(e.size.width, e.size.height), document.documentElement.style.setProperty("--scale", e.scale.toString()), a.b(e.showDetails)) a.b(e.showPreview) || (document.getElementById("details-img").style.display = "none");
+        else {
+            let t = document.getElementById("left-container");
+            e.size.width = e.size.width - function(e) {
+                let t = window.getComputedStyle(e),
+                    n = parseFloat(t.marginLeft) + parseFloat(t.marginRight);
+                return e.offsetWidth + n
+            }(t), me(e.size.width, e.size.height), t.style.display = "none", document.getElementById("tabs-container").style.width = "100%"
+        }
+        r.hideAfterTabSelection = a.b(e.hideAfterTabSelection), r.searchInURLs = a.b(e.searchInURLs)
+    }
+    async function ge() {
+        void 0 === window.browser || void 0 === browser.tabs.captureTab || (s = !0), await be(), re(), await Object(d.a)("WRONG_TO_RIGHT_GET", {}).then(e => {
+                l = e.wrongToRight
+            }), await oe(), document.getElementById("search").addEventListener("keypress", i),
+            function() {
+                function getCurrentWindowTabs() {
+                    return browser.tabs.query({
+                        currentWindow: true
+                    });
+                }
+                function firstUnpinnedTab(tabs) {
+                    for (var tab of tabs) {
+                        if (!tab.pinned) {
+                            return tab.index;
+                        }
+                    }
+                }
+                document.addEventListener("click", (e) => {
+
+                    function callOnActiveTab(callback) {
+                        getCurrentWindowTabs().then((tabs) => {
+                            for (var tab of tabs) {
+                                if (tab.active) {
+                                    callback(tab, tabs);
+                                }
+                            }
+                        });
+                    }
+
+                    if (e.target.id === "tabs-move-beginning") {
+
+                        callOnActiveTab((tab, tabs) => {
+                            var index = 0;
+                            if (!tab.pinned) {
+                                index = firstUnpinnedTab(tabs);
+                            }
+                            console.log(`moving ${tab.id} to ${index}`)
+                            browser.tabs.move([tab.id], {
+                                index
+                            });
+                        });
+                        r.tabsList = document.getElementById("tabs-list"), "loading" === document.readyState ? document.addEventListener("DOMContentLoaded", ge) : ge()
+
+                    }
+
+                    if (e.target.id === "tabs-move-end") {
+                        callOnActiveTab((tab, tabs) => {
+                            var index = -1;
+                            if (tab.pinned) {
+                                var lastPinnedTab = Math.max(0, firstUnpinnedTab(tabs) - 1); 
+                            }
+                            browser.tabs.move([tab.id], {
+                                index
+                            });
+                        });
+                        r.tabsList = document.getElementById("tabs-list"), "loading" === document.readyState ? document.addEventListener("DOMContentLoaded", ge) : ge()
+
+                    } 
+                });
+                document.addEventListener("mouseover", R), document.addEventListener("click", W), document.addEventListener("keydown", j);
+                let e = Array.from(document.getElementsByClassName("copy-button"));
+                for (let t = 0; t < e.length; t++) e[t].addEventListener("click", e => {
+                    document.oncopy = t => {
+                        t.clipboardData.setData("text", document.getElementById(e.target.getAttribute("for")).innerText), t.preventDefault()
+                    }, document.execCommand("copy", !1, null), e.target.innerText = "Copied!", setTimeout(() => {
+                        e.target.innerText = "Copy"
+                    }, 2e3)
+                });
+                document.getElementById("save-for-later").addEventListener("click", Z), document.getElementById("restore-now").addEventListener("click", async () => {
+                    let e = (await browser.storage.sync.get("save-for-later"))["save-for-later"],
+                        t = e["last-modified-channel"],
+                        n = e.channels[t].records;
+                    !async function(e) {
+                        for (let t of e.windows) H(t)
+                    }(n[n.length - 1])
+                }), browser.runtime.onMessage.hasListener(F) || browser.runtime.onMessage.addListener(F);
+                let t = document.getElementById("search");
+                t.addEventListener("keydown", Q), t.addEventListener("keyup", J), t.focus();
+                for (let e of document.getElementsByClassName("context-menu")) e.addEventListener("click", e => e.stopPropagation()), e.addEventListener("keydown", e => e.stopPropagation());
+                document.getElementById("window-entry-context-menu-rename").addEventListener("click", de), document.getElementById("window-entry-rename-cancel-btn").addEventListener("click", le), document.getElementById("window-entry-rename-btn").addEventListener("click", ce), document.getElementById("window-entry-rename-box").addEventListener("keydown", ue), document.getElementById("settings-btn").addEventListener("click", () => {
+                    browser.runtime.openOptionsPage(), window.close()
+                }), window.addEventListener("unload", () => {
+                    Object(d.a)("POPUP_UNLOADED", {})
+                }), Object(d.a)("INIT__POPUP_LOADED", {})
+            }()
+    }
+    r.tabsList = document.getElementById("tabs-list"), "loading" === document.readyState ? document.addEventListener("DOMContentLoaded", ge) : ge()
+}]);
