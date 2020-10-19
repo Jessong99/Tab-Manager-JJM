@@ -2,4 +2,28 @@
 	"manifest_version":2,
 	"name":"Tab Manager",
 	"version":"1",
+	"description":"Assist user to organize and ease the operation of multiple windows and tabs with a variety of useful features.",
+	"icons":{
+		"48":"icons/tab-48.png",
+		"96":"icons/tab-96.png"
+	},
+	"permissions":[
+		"tabs",
+		"storage",
+    	"activeTab",
+		"contextMenus",
+		"<all_urls>",
+		"cookies",
+		"contextualIdentities"
+	],
+	"options_ui":{
+		"page":"options/options.html",
+		"open_in_tab":true
+	},
+	"applications":{
+		"gecko":{
+			"id":"tabmanager@gmail.com",
+			"strict_min_version":"59.0"
+		}
+	}
 }
