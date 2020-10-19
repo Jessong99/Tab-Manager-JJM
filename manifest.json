@@ -48,6 +48,20 @@
 			},
 			"description":"Open Tab Manager, with focus on the current tab"
 		},
+		"last-used-tab":{
+			"suggested_key":{
+				"default":"Ctrl+Shift+L",
+				"mac":"MacCtrl+Shift+L"
+			},
+			"description":"Open last used tab"
+		},
+		"last-used-window":{
+			"suggested_key":{
+				"default":"Ctrl+Shift+0",
+				"mac":"MacCtrl+Shift+0"
+			},
+			"description":"Open last used window"
+		}
 	},
 	"applications":{
 		"gecko":{
