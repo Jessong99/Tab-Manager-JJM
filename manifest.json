@@ -20,6 +20,19 @@
 		"page":"options/options.html",
 		"open_in_tab":true
 	},
+	"content_scripts":[{
+		"matches":["<all_urls>"],
+		"js":["content/content.js"]
+	}],
+	"browser_action":{
+		"default_icon":"icons/tab-32.png",
+		"default_title":"Tab Manager",
+		"default_popup":"popup/index.html"
+	},
+	"background":{
+		"scripts":[
+			"background/background.js"
+	]},
 	"applications":{
 		"gecko":{
 			"id":"tabmanager@gmail.com",
