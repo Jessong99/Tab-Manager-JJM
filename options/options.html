@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tab Manager Settings</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+    <!-- Copied from original -->
+    <link rel="stylesheet" href="elements/elements.css" />
+    <script type="text/javascript" src="elements/elements.js"></script>
+    <link rel="stylesheet" href="options.css" />
+    <script type="text/javascript" src="options.js"></script>
+
+  </head>
+  <body>
+    <div id="content" class="content">
+      <form action="/">
+        <div id = "header" class="banner">
+          <h1>Tab Manager Settings</h1>
+        </div>
+        
+        <div class="panel">
+            <div id="popup-options" class="section">
+
+                <!-- Pop up size -->
+                <div class="option">
+                  <label for="pop-up-size"><b><h3>Pop Up Size</h3></b><span></span></label>
+                  <div id="option-popup-size">
+                      <input id="option-popup-width" type="number" placeholder="Width" max="800"></input>
+                      <span style="font-size: 15px;">&nbsp;X&nbsp;</span>
+                      <input id="option-popup-height" type="number" placeholder="Height" max="600"></input>
+                  </div>
+                </div>
+                
+                <!-- Pop up scale -->
+                <div class="option">
+                  <label for="pop-up-scale"><b><h3>Pop Up Scale</h3></b><span></span></label>
+                  <input id="option-popup-scale" type="number" placeholder="Scale" step="0.1" min="0.1"></input>
+                </div>
+
+
+                <div class = "row">
+
+                  <!-- Column Left -->
+                  <div class="column">
+
+                    <!-- Tab Review -->
+                    <div class="option">
+                      <label><h3><b>Enable Tab Preview While Hovering</h3></b></label>
+                      <div id="option-review" class="ui-switch"></div>
+                    </div><br>
+
+                    <!-- Show Tab Details -->
+                    <div class="option">
+                      <label><h3><b>Enable Tab Details</h3></b></label>
+                      <div id="option-details" class="ui-switch"></div>
+                    </div>
+                    
+
+                  </div>
+                  <!-- End of Column Left -->
+
+ 
+
+            </div>
+          </div>
+      </form>
+    </div>
+  </body>
+</html>
