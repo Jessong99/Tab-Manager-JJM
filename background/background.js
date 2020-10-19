@@ -251,5 +251,201 @@
             }
         }(e, t), o = await browser.storage.sync.get(["save-for-later"]);
         return void 0 !== o["save-for-later"].channels[r] && (o["save-for-later"].channels[r].records.length >= o["save-for-later"].channels[r]["maximum-number-of-records"] && o["save-for-later"].channels[r].records.shift(), o["save-for-later"]["last-modified-channel"] = r, o["save-for-later"].channels[r].records.push(n)), browser.storage.sync.set(o)
-    }
+            }
+            function u(e, t) {
+                browser.runtime.sendMessage({
+                    type: t,
+                    details: e
+                })
+            }
+            n.wrongToRight = {};
+            let c = {};
 
+            function w(e) {
+                return n.wrongToRight[e] || e
+            }
+            browser.tabs.onAttached.addListener((function (e, t) {
+                browser.tabs.get(e).then((function (t) {
+                    if (e !== t.id) {
+                        let r = c[e];
+                        r && delete n.wrongToRight[r], n.wrongToRight[t.id] = e, c[e] = t.id
+                    }
+                }))
+            })), browser.tabs.onRemoved.addListener((function (e, t) {
+                let r = c[e];
+                r && delete n.wrongToRight[r];
+                delete c[e]
+            }));
+            var l = r(2);
+            var b = r(1);
+
+            function p(e) {
+                "update" === e.reason && browser.windows.create({
+                    //url: "https://github.com/Jessong99/Tab-Manager"
+                }), "install" !== e.reason && "update" !== e.reason || (browser.storage.local.get(["options"]).then(e => {
+                    void 0 === e.options && (e.options = b.a, browser.storage.local.set(e))
+                }), browser.storage.sync.get(["save-for-later", "record"]).then(e => {
+                    void 0 === e["save-for-later"] && (e["save-for-later"] = {
+                        version: 2.1,
+                        "last-modified-channel": "Default",
+                        channels: {
+                            Default: {
+                                "maximum-number-of-records": 1,
+                                records: []
+                            }
+                        }
+                    }, browser.storage.sync.set(e).then(() => {
+                        void 0 !== e.record && (e["save-for-later"].channels.Default.records.push({
+                            name: null,
+                            timestamp: e.record.timestamp,
+                            windows: e.record.record.map(e => ({
+                                name: null,
+                                incognito: !1,
+                                tabs: e.map(e => Object.assign({
+                                    container: null,
+                                    title: e.url,
+                                    active: !1,
+                                    muted: !1
+                                }, e))
+                            }))
+                        }), delete e.record, browser.storage.sync.set(e))
+                    }))
+                }))
+            }
+            browser.runtime.onInstalled.hasListener(p) || browser.runtime.onInstalled.addListener(p), browser.tabs.query({
+                active: !0,
+                currentWindow: !0
+            }).then(e => {
+                n.currentTabId = e[0].id, n.dropCurrentTabId = !0
+            }), browser.windows.getLastFocused({}).then(e => {
+                n.currentWindowId = e.id, n.dropCurrentWindowId = !0
+            }), browser.tabs.onUpdated.addListener((function (e, t, r) {
+                void 0 !== t.favIconUrl && u({
+                    tabId: w(e),
+                    favIconUrl: t.favIconUrl
+                }, "TAB_FAV_ICON_CHANGED"), void 0 !== t.pinned && u({
+                    tabId: w(e),
+                    pinned: t.pinned
+                }, "TAB_PINNED_STATUS_CHANGED"), void 0 !== t.title && u({
+                    tabId: w(e),
+                    title: t.title
+                }, "TAB_TITLE_CHANGED"), void 0 !== t.audible && u({
+                    tabId: w(e),
+                    audible: t.audible
+                }, "TAB_AUDIBLE_CHANGED"), void 0 !== t.mutedInfo && u({
+                    tabId: w(e),
+                    mutedInfo: t.mutedInfo
+                }, "TAB_MUTE_CHANGED")
+            })), browser.tabs.onActivated.addListener((function (e) {
+                u({
+                    windowId: e.windowId,
+                    tabId: e.tabId
+                }, "ACTIVE_TAB_CHANGED"), n.dropCurrentTabId ? n.lastTabId = n.currentTabId : n.dropCurrentTabId = !0, n.currentTabId = e.tabId
+            })), browser.tabs.onRemoved.addListener((function (e, t) {
+                u({
+                    tabId: e,
+                    windowId: t.windowId,
+                    windowClosing: t.isWindowClosing
+                }, "TAB_REMOVED"), n.lastTabId === e && (n.lastTabId = void 0), n.currentTabId === e && (n.currentTabId = void 0, n.dropCurrentTabId = !1)
+            })), browser.windows.onRemoved.addListener((function (e) {
+                u({
+                    windowId: e
+                }, "WINDOW_REMOVED"), n.lastWindowId === e && (n.lastWindowId = void 0), n.currentWindowId === e && (n.currentWindowId = void 0, n.dropCurrentWindowId = !1), o()
+            })), browser.windows.onFocusChanged.addListener((function (e) {
+                e !== browser.windows.WINDOW_ID_NONE && (n.dropCurrentWindowId ? n.lastWindowId = n.currentWindowId : n.dropCurrentWindowId = !0, n.currentWindowId = e, browser.tabs.query({
+                    active: !0,
+                    windowId: e
+                }).then(e => {
+                    e[0].id !== n.currentTabId && (n.dropCurrentTabId ? n.lastTabId = n.currentTabId : n.dropCurrentTabId = !0, n.currentTabId = e[0].id)
+                }))
+            })), browser.windows.onCreated.addListener((function (e) {
+                o()
+            })), browser.commands.onCommand.addListener((function (e) {
+                switch (e) {
+                    case "last-used-tab":
+                        void 0 !== n.lastTabId && (browser.tabs.update(n.lastTabId, {
+                            active: !0
+                        }), browser.windows.getLastFocused({}).then(e => {
+                            browser.tabs.get(n.lastTabId).then(t => {
+                                e.id !== t.windowId && (browser.windows.update(t.windowId, {
+                                    focused: !0
+                                }), n.lastTabId = n.currentTabId)
+                            })
+                        }));
+                        break;
+                    case "last-used-window":
+                        void 0 !== n.lastWindowId && browser.windows.update(n.lastWindowId, {
+                            focused: !0
+                        });
+                        break;
+                    case "open-tabby-focus-current":
+                        browser.browserAction.openPopup().then(() => {
+                            n.events.onpopuploaded = () => {
+                                Object(l.a)("INIT__PUT_FOCUS_ON_CURRENT", {})
+                            }, n.events.onpopupunloaded = () => {
+                                n.events.onpopuploaded = void 0, n.events.onpopupunloaded = void 0
+                            }
+                        })
+                }
+            })), browser.runtime.onMessage.addListener((function (e, t) {
+                switch (e.type) {
+                    case "INIT__POPUP_LOADED":
+                        n.events.onpopuploaded && n.events.onpopuploaded();
+                        break;
+                    case "POPUP_UNLOADED":
+                        n.events.onpopupunloaded && n.events.onpopupunloaded();
+                        break;
+                    case "WRONG_TO_RIGHT_GET":
+                        return Promise.resolve({
+                            wrongToRight: n.wrongToRight
+                        });
+                    case "SET_WINDOW_PROPS":
+                        return a(e.data.windowId, e.data.name);
+                    case "GET_WINDOW_PROPS":
+                        return Promise.resolve({
+                            windowProperties: d()
+                        });
+                    case "RESTORE_WINDOW":
+                        return r = e.data.windowRecord, browser.runtime.getBrowserInfo && (r.tabs = r.tabs.filter(e => (!e.url.startsWith("about:") || ["about:blank", "about:newtab"].includes(e.url)) && !e.url.startsWith("chrome:") && !e.url.startsWith("javascript:") && !e.url.startsWith("data:") && !e.url.startsWith("file:"))), browser.windows.create({
+                            incognito: r.incognito
+                        }).then(async e => {
+                            let t = e.tabs[0].id,
+                                n = !1;
+                            await a(e.id, r.name);
+                            for (let o = 0; o < r.tabs.length; o++) {
+                                let a = r.tabs[o];
+                                browser.tabs.create(Object.assign(a.container ? {
+                                    cookieStoreId: a.container.id
+                                } : {}, {
+                                        url: a.url,
+                                        active: a.active,
+                                        pinned: a.pinned,
+                                        windowId: e.id
+                                    })).then(async e => {
+                                        var r, o;
+                                        browser.tabs.update(e.id, {
+                                            muted: a.muted
+                                        }), a.pack && await (r = e.id, o = () => {
+                                            browser.tabs.sendMessage(e.id, {
+                                                target: "packd",
+                                                data: Object.assign({
+                                                    action: "unpack"
+                                                }, a.pack)
+                                            })
+                                        }, new Promise((e, t) => {
+                                            let n = (t, a) => {
+                                                t === r && "complete" === a.status && (browser.tabs.onUpdated.removeListener(n), e(o()))
+                                            };
+                                            browser.tabs.onUpdated.addListener(n)
+                                        })), n || (n = !0, browser.tabs.remove(t))
+                                    }).catch(e => {
+                                        console.log(e)
+                                    })
+                            }
+                        });
+                    case "RECORD":
+                        return s(e.data.id, e.data.name, e.data.channelName)
+                }
+                var r
+            })), o()
+        }]);
